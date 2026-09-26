@@ -111,23 +111,23 @@ function i16ToFloat32(bytes) {
 }
 
 // ---- agent audio playback ----
-function ensurePlayCtx(rate) {
-  if (playCtx && playCtx.sampleRate === rate) return playCtx;
-  if (playCtx) playCtx.close();
-  playCtx = null;
-  try {
-    playCtx = new AudioContext({ sampleRate: rate });
-  } catch {
-    playCtx = new AudioContext();
-  }
+// Playback always runs at 48 kHz (universally supported, good resampler
+// quality from any TTS rate). Agent audio arriving at ttsRate is
+// resampled on the fly before scheduling.
+function ensurePlayCtx() {
+  if (playCtx) return playCtx;
+  playCtx = new AudioContext({ sampleRate: 48000 });
   nextEnd = 0;
   return playCtx;
 }
 
 function schedulePcm(f32) {
   const ctx = playCtx;
-  const buf = ctx.createBuffer(1, f32.length, ctx.sampleRate);
-  buf.copyToChannel(f32, 0);
+  const out = (ttsRate === ctx.sampleRate)
+    ? f32
+    : resampleLinear(f32, ttsRate, ctx.sampleRate);
+  const buf = ctx.createBuffer(1, out.length, ctx.sampleRate);
+  buf.copyToChannel(out, 0);
   const src = ctx.createBufferSource();
   src.buffer = buf;
   src.connect(ctx.destination);
@@ -210,10 +210,10 @@ function wsHandleMessage(data, isBinary) {
     case 'llm_end':
       break;
     case 'tts_start':
-      ensurePlayCtx(m.sampleRate);
+      ttsRate = m.sampleRate;
+      ensurePlayCtx();
       if (playCtx.state === 'suspended') playCtx.resume();
       nextEnd = 0;
-      ttsRate = m.sampleRate;
       playbackStarted = false;
       pendingPcm = [];
       pendingLen = 0;

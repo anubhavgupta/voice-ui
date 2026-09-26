@@ -21,6 +21,9 @@ export const cfg = {
   ttsPort: int('TTS_PORT', 8091),
   ttsThreads: int('TTS_THREADS', 8),
   ttsVoice: process.env.TTS_VOICE || '',
+  // The TTS backend's native PCM rate. Kokoro = 24000 (confirmed by
+  // crispasr's own log: "chunks=2 sr=24000Hz"). Override per backend if you
+  // switch (e.g. qwen3-tts → 24000, orpheus → 16000, chatterbox → 24000).
   ttsSampleRate: int('TTS_SAMPLE_RATE', 24000),
   llmBaseUrl: (process.env.LLM_BASE_URL || '').replace(/\/+$/, ''),
   llmApiKey: process.env.LLM_API_KEY || '',

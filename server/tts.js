@@ -36,21 +36,23 @@ export class TtsServer {
 
   async waitReady(timeoutMs = 300000) {
     const deadline = Date.now() + timeoutMs;
+    let up = false;
     while (Date.now() < deadline) {
       try {
         const res = await fetch(`${this.url}/health`);
         if (res.ok) {
           const j = await res.json();
-          log(`TTS: ready (backend=${j.backend})`);
-          return;
+          up = true;
+          log(`TTS: ready (backend=${j.backend}, assumed PCM rate=${cfg.ttsSampleRate} Hz)`);
+          break;
         }
       } catch { /* not up yet */ }
       await new Promise((r) => setTimeout(r, 500));
     }
-    throw new Error(`TTS server did not become ready within ${timeoutMs / 1000}s (first run downloads the model)`);
+    if (!up) throw new Error(`TTS server did not become ready within ${timeoutMs / 1000}s (first run downloads the model)`);
   }
 
-  /** Async iterator of PCM chunks (int16 LE mono at cfg.ttsSampleRate). */
+  /** Async iterator of PCM chunks (int16 LE mono at cfg.ttsSampleRate, each buffer sample-aligned). */
   async *synthesize(text) {
     console.log("received:", text);
     const body = { input: text, stream: true, response_format: 'pcm' };
@@ -64,6 +66,16 @@ export class TtsServer {
       const detail = await res.text().catch(() => '');
       throw new Error(`TTS ${res.status}: ${detail.slice(0, 200)}`);
     }
-    for await (const chunk of res.body) yield chunk;
+    // Reassemble network chunks into sample-aligned (even-byte) buffers.
+    let pending = Buffer.alloc(0);
+    for await (const chunk of res.body) {
+      pending = pending.length ? Buffer.concat([pending, chunk]) : chunk;
+      if (pending.length >= 2) {
+        const aligned = pending.subarray(0, pending.length - (pending.length & 1));
+        if (aligned.length) yield aligned;
+        pending = pending.subarray(aligned.length);
+      }
+    }
+    // A trailing odd byte is less than one sample; discard.
   }
 }
