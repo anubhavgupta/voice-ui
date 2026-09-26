@@ -1,0 +1,14 @@
+{
+  "name": "voice-ai-ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bidirectional voice chat agent: CrispASR (ASR+TTS) + any OpenAI-compatible LLM",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "e2e": "node --env-file-if-exists=.env test/e2e.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
