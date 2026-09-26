@@ -1,4 +1,4 @@
-# voice-ai-ui
+# voice-ui
 
 Bidirectional voice chat agent: you talk, the agent talks back — in the browser.
 
