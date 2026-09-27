@@ -14,6 +14,7 @@ export class TtsServer {
       '--auto-download',
       '--host', '127.0.0.1',
       '--port', String(cfg.ttsPort),
+      '--server-workers', "8",
       '--threads', String(cfg.ttsThreads),
     ];
     if (cfg.ttsVoice) args.push('--voice', cfg.ttsVoice);

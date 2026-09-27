@@ -6,7 +6,8 @@
   "description": "Bidirectional voice chat agent: CrispASR (ASR+TTS) + any OpenAI-compatible LLM",
   "scripts": {
     "start": "node --env-file-if-exists=.env server/index.js",
-    "e2e": "node --env-file-if-exists=.env test/e2e.js"
+    "e2e": "node --env-file-if-exists=.env test/e2e.js",
+    "podcast": "node podcast-gen.js"
   },
   "dependencies": {
     "ws": "^8.18.0"

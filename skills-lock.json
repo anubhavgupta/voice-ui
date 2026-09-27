@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "avoid-ai-writing": {
+      "source": "conorbronsdon/avoid-ai-writing",
+      "sourceType": "github",
+      "skillPath": "skills/avoid-ai-writing/SKILL.md",
+      "computedHash": "6a94b449e18acb990dc9b7b7aebd22676db6fa7aeda242473b55e428ad096e81"
+    },
+    "voice-preserving-rewriter": {
+      "source": "conorbronsdon/avoid-ai-writing",
+      "sourceType": "github",
+      "skillPath": "skills/voice-preserving-rewriter/SKILL.md",
+      "computedHash": "3c451aa57ad400b5165e6066ad4870a316fb210805d0677015a8ea7317ca0062"
+    }
+  }
+}
